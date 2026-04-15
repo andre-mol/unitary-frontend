@@ -6,6 +6,12 @@ Este projeto simula um sistema completo de gestão de patrimônio, com múltipla
 
 ---
 
+## Preview
+
+<img width="1919" height="945" alt="image" src="https://github.com/user-attachments/assets/9cd2414b-da6d-4264-a244-d2327a483930" />
+
+---
+
 ## Demo
 
 https://unitary.com.br

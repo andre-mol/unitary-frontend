@@ -1,9 +1,12 @@
-import { DEMO_USER_ID, DEMO_USER_EMAIL, DEMO_USER_NAME } from './demoMode';
+import { getRpcMockData, getTableMockData } from './mockRpcData';
+
+const TABLE_MOCK_DATA = getTableMockData();
+const RPC_MOCK_DATA = getRpcMockData();
 
 const MOCK_SUPABASE_USER = {
-  id: DEMO_USER_ID,
-  email: DEMO_USER_EMAIL,
-  user_metadata: { name: DEMO_USER_NAME },
+  id: 'demo-user-00000000-0000-0000-0000-000000000001',
+  email: 'demo@unitary.app',
+  user_metadata: { name: 'André (Demo)' },
   app_metadata: {},
   aud: 'authenticated',
   role: 'authenticated',
@@ -18,66 +21,6 @@ const MOCK_SESSION = {
   expires_in: 3600,
   expires_at: Math.floor(Date.now() / 1000) + 3600,
   user: MOCK_SUPABASE_USER,
-};
-
-const MOCK_PROFILE = {
-  id: DEMO_USER_ID,
-  full_name: DEMO_USER_NAME,
-  phone: null,
-  avatar_url: null,
-  role: null,
-};
-
-const MOCK_USER_SETTINGS = {
-  user_id: DEMO_USER_ID,
-  theme: 'system',
-  notifications_email: true,
-  product_updates_opt_in: true,
-  marketing_emails_opt_in: false,
-  terms_accepted_at: '2024-01-15T10:00:00.000Z',
-  terms_version: '1.0',
-  privacy_version: '1.0',
-  communications_version: '1.0',
-};
-
-const MOCK_SUBSCRIPTION = {
-  user_id: DEMO_USER_ID,
-  plan: 'patrio_pro',
-  status: 'active',
-  current_period_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-  cancel_at_period_end: false,
-};
-
-const TABLE_MOCK_DATA: Record<string, any[]> = {
-  profiles: [MOCK_PROFILE],
-  user_settings: [MOCK_USER_SETTINGS],
-  user_subscriptions: [MOCK_SUBSCRIPTION],
-  user_system_notifications: [],
-  bug_reports: [],
-  market_quotes: [],
-  support_tickets: [],
-  support_messages: [],
-  broadcast_notifications: [],
-};
-
-const RPC_MOCK_DATA: Record<string, any> = {
-  patrio_is_admin: false,
-  patrio_admin_get_settings: {},
-  patrio_get_timeline_monthly: [],
-  patrio_get_timeline_events: [],
-  get_user_dividends: [],
-  patrio_get_wealth_year_series: [],
-  patrio_get_wealth_month_breakdown: [],
-  patrio_get_available_years: [{ year: new Date().getFullYear() }],
-  get_portfolio_market_history: [],
-  get_global_portfolio_history: [],
-  get_portfolio_performance_daily: [],
-  get_portfolio_performance_monthly: [],
-  calculate_reinvested_return: null,
-  consolidate_user_portfolios: null,
-  patrio_upsert_wealth_monthly_snapshot: null,
-  patrio_self_heal_wealth_zero_snapshots: null,
-  patrio_backfill_history: null,
 };
 
 class MockQueryBuilder {
@@ -176,9 +119,7 @@ export function createMockSupabaseClient(): any {
 
     rpc(name: string, _params?: any) {
       const data = name in RPC_MOCK_DATA ? RPC_MOCK_DATA[name] : null;
-      return new MockQueryBuilder(Array.isArray(data) ? data : null).single()
-        ? Promise.resolve({ data, error: null })
-        : Promise.resolve({ data, error: null });
+      return Promise.resolve({ data, error: null });
     },
 
     auth: {
@@ -230,7 +171,10 @@ export function createMockSupabaseClient(): any {
     },
 
     functions: {
-      invoke(_name: string, _opts?: any) {
+      invoke(name: string, _opts?: any) {
+        if (name === 'get-portfolio-timeseries') {
+          return Promise.resolve({ data: { series: [] }, error: null });
+        }
         return Promise.resolve({ data: null, error: null });
       },
     },

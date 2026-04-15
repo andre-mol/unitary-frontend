@@ -21,6 +21,9 @@
  * VITE_SUPABASE_ANON_KEY=sua-anon-key
  * VITE_APP_ENV=development
  * ```
+ *
+ * MODO DEMO (sem backend): defina VITE_DEMO_MODE=true em .env.local ou .env.development.
+ * O Vite em `npm run dev` NÃO carrega .env.production — só build de produção.
  * 
  * IMPORTANTE:
  * - NUNCA commit o arquivo .env com chaves reais

@@ -24,6 +24,12 @@ import { SupabaseAuthRepository } from '../infrastructure/auth/SupabaseAuthRepos
 import { isSupabaseConfigured } from '../config/supabase';
 import { env } from '../config/env';
 import { DEMO_USER_ID, DEMO_USER_EMAIL, DEMO_USER_NAME } from '../mocks/demoMode';
+import {
+    isDemoSessionActive,
+    setDemoSessionActive,
+    notifyDemoAuthChanged,
+    validateDemoCredentials,
+} from '../mocks/demoAuthSession';
 
 // ============================================================
 // REPOSITORY INJECTION - SUPABASE AUTH (Produção)
@@ -88,8 +94,21 @@ export const authService = {
      * 
      * SUPABASE: Uses supabase.auth.signInWithPassword()
      */
-    signIn: async (email: string, _password: string) => {
-        if (env.DEMO_MODE) return { user: { email: DEMO_USER.email }, error: null };
+    signIn: async (email: string, password: string) => {
+        if (env.DEMO_MODE) {
+            if (!validateDemoCredentials(email, password)) {
+                return {
+                    user: null,
+                    error: {
+                        message: 'E-mail ou senha incorretos.',
+                        code: 'invalid_credentials',
+                    },
+                };
+            }
+            setDemoSessionActive(true);
+            notifyDemoAuthChanged();
+            return { user: { email: DEMO_USER.email }, error: null };
+        }
 
         const repo = getRepository();
         if (!repo) {
@@ -122,7 +141,16 @@ export const authService = {
         privacyVersion?: string;
         communicationsVersion?: string;
     }) => {
-        if (env.DEMO_MODE) return { user: { email: data.email }, error: null };
+        if (env.DEMO_MODE) {
+            return {
+                user: null,
+                error: {
+                    message:
+                        'Cadastro não está disponível na demonstração. Use Entrar com as credenciais indicadas no portfólio.',
+                    code: 'DEMO_SIGNUP_DISABLED',
+                },
+            };
+        }
 
         const ADMIN_API_URL = import.meta.env.VITE_ADMIN_API_URL || 'http://localhost:3000';
 
@@ -167,7 +195,14 @@ export const authService = {
      * SUPABASE: Uses supabase.auth.signInWithOAuth({ provider: 'google' })
      */
     signInWithGoogle: async () => {
-        if (env.DEMO_MODE) return { error: null };
+        if (env.DEMO_MODE) {
+            return {
+                error: {
+                    message: 'Login com Google não está disponível na demonstração.',
+                    code: 'DEMO_GOOGLE_DISABLED',
+                },
+            };
+        }
 
         const repo = getRepository();
         if (!repo) {
@@ -185,7 +220,11 @@ export const authService = {
      * SUPABASE: Uses supabase.auth.signOut()
      */
     signOut: async () => {
-        if (env.DEMO_MODE) return { error: null };
+        if (env.DEMO_MODE) {
+            setDemoSessionActive(false);
+            notifyDemoAuthChanged();
+            return { error: null };
+        }
 
         const repo = getRepository();
         if (!repo) {
@@ -205,7 +244,12 @@ export const authService = {
      * Get current session
      */
     getSession: async () => {
-        if (env.DEMO_MODE) return { session: DEMO_SESSION, error: null };
+        if (env.DEMO_MODE) {
+            if (!isDemoSessionActive()) {
+                return { session: null, error: null };
+            }
+            return { session: DEMO_SESSION, error: null };
+        }
 
         const repo = getRepository();
         if (!repo) {
@@ -221,7 +265,12 @@ export const authService = {
      * Get current user
      */
     getCurrentUser: async () => {
-        if (env.DEMO_MODE) return { user: DEMO_USER, error: null };
+        if (env.DEMO_MODE) {
+            if (!isDemoSessionActive()) {
+                return { user: null, error: null };
+            }
+            return { user: DEMO_USER, error: null };
+        }
 
         const repo = getRepository();
         if (!repo) {
@@ -239,8 +288,13 @@ export const authService = {
      */
     onAuthStateChange: (callback: (user: AuthUser | null) => void): (() => void) => {
         if (env.DEMO_MODE) {
-            setTimeout(() => callback(DEMO_USER), 50);
-            return () => {};
+            const emit = () => {
+                callback(isDemoSessionActive() ? DEMO_USER : null);
+            };
+            emit();
+            const onChange = () => emit();
+            window.addEventListener('patrio-demo-auth-changed', onChange);
+            return () => window.removeEventListener('patrio-demo-auth-changed', onChange);
         }
 
         const repo = getRepository();
@@ -259,6 +313,15 @@ export const authService = {
      * EDGE FUNCTION: custom-reset-email (opcional, para emails customizados)
      */
     resetPassword: async (email: string) => {
+        if (env.DEMO_MODE) {
+            return {
+                error: {
+                    message: 'Recuperação de senha não está disponível na demonstração.',
+                    code: 'DEMO_RESET_DISABLED',
+                },
+            };
+        }
+
         const repo = getRepository();
         if (!repo) {
             const error = notConfiguredError<void>();
@@ -275,6 +338,15 @@ export const authService = {
      * SUPABASE: Uses supabase.auth.updateUser({ password })
      */
     updatePassword: async (newPassword: string) => {
+        if (env.DEMO_MODE) {
+            return {
+                error: {
+                    message: 'Atualização de senha não está disponível na demonstração.',
+                    code: 'DEMO_UPDATE_PASSWORD_DISABLED',
+                },
+            };
+        }
+
         const repo = getRepository();
         if (!repo) {
             const error = notConfiguredError<void>();

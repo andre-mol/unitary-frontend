@@ -14,7 +14,8 @@ import {
     Goal,
     Budget,
     Objective,
-    Expense
+    Expense,
+    Income
 } from '../../domain/repositories/PlanningRepository';
 import { safeJsonParse } from '../../utils/storage';
 
@@ -22,6 +23,7 @@ import { safeJsonParse } from '../../utils/storage';
 const GOALS_KEY = 'patrio_goals';
 const BUDGET_KEY = 'patrio_budget';
 const EXPENSES_KEY_PREFIX = 'patrio_expenses_';
+const INCOMES_KEY_PREFIX = 'patrio_incomes_';
 const OBJECTIVES_KEY = 'patrio_objectives';
 
 // Custom Event for updates
@@ -231,6 +233,50 @@ export class LocalStoragePlanningRepository implements PlanningRepository {
             this.dispatchUpdateEvent();
         }
 
+        return Promise.resolve();
+    }
+
+    // === INCOME ===
+
+    getIncomes(monthStr: string): Promise<Income[]> {
+        const data = localStorage.getItem(`${INCOMES_KEY_PREFIX}${monthStr}`);
+        return Promise.resolve(safeJsonParse<Income[]>(data, []));
+    }
+
+    async saveIncomes(monthStr: string, incomes: Income[]): Promise<void> {
+        const existing = await this.getIncomes(monthStr);
+        const preserved = existing.filter((i) => i.source && i.source !== 'manual');
+        const newManuals = incomes.filter((i) => !i.source || i.source === 'manual');
+        const merged = [...preserved, ...newManuals];
+        localStorage.setItem(`${INCOMES_KEY_PREFIX}${monthStr}`, JSON.stringify(merged));
+        this.dispatchUpdateEvent();
+        return Promise.resolve();
+    }
+
+    async upsertIncomes(incomes: Income[]): Promise<void> {
+        if (incomes.length === 0) return Promise.resolve();
+
+        const byMonth = new Map<string, Income[]>();
+        for (const inc of incomes) {
+            const list = byMonth.get(inc.month) || [];
+            list.push(inc);
+            byMonth.set(inc.month, list);
+        }
+
+        for (const [month, newIncomes] of byMonth.entries()) {
+            const existing = await this.getIncomes(month);
+            const resolved = existing.filter((oldI) =>
+                !newIncomes.some((newI) =>
+                    newI.source === oldI.source &&
+                    newI.sourceRef === oldI.sourceRef &&
+                    newI.name === oldI.name
+                )
+            );
+            resolved.push(...newIncomes);
+            localStorage.setItem(`${INCOMES_KEY_PREFIX}${month}`, JSON.stringify(resolved));
+        }
+
+        this.dispatchUpdateEvent();
         return Promise.resolve();
     }
 

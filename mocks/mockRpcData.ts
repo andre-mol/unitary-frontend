@@ -231,7 +231,7 @@ export function getRpcMockData(): Record<string, any> {
     get_portfolio_performance_daily: DAILY_PERFORMANCE,
     get_portfolio_performance_monthly: DAILY_PERFORMANCE.filter((_, i) => i % 22 === 0),
     calculate_reinvested_return: { reinvested_return: 0.187, total_dividends: 1832.1 },
-    consolidate_user_portfolios: null,
+    consolidate_user_portfolios: { status: 'already_consolidated' },
     patrio_upsert_wealth_monthly_snapshot: null,
     patrio_self_heal_wealth_zero_snapshots: [],
     patrio_backfill_history: { processed_months: 12, last_month_updated: monthKey(currentYear, currentMonth) },

@@ -10,7 +10,7 @@ import { brand } from '../../config/brand';
 import { NotificationsDropdown } from './NotificationsDropdown';
 
 export const Header: React.FC<{ title: string; subtitle?: string }> = ({ title, subtitle }) => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { plan } = useSubscription();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -36,6 +36,7 @@ export const Header: React.FC<{ title: string; subtitle?: string }> = ({ title, 
   const handleLogout = async () => {
     try {
       await authService.signOut();
+      await refreshUser();
       navigate('/');
     } catch (error) {
       console.error("Erro ao sair", error);

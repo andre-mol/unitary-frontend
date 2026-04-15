@@ -1,3 +1,5 @@
+import { env } from '../config/env';
+
 /**
  * ============================================================
  * LEGACY LOCAL DATA CLEANUP
@@ -67,6 +69,13 @@ export function cleanupLegacyLocalData(): {
 } {
     // Only run once per session
     if (cleanupPerformed) {
+        return { cleaned: false, keysRemoved: [] };
+    }
+
+    // Modo demo e backend local: todo o app usa patrio_* no localStorage — apagar aqui
+    // zera a Visão Geral logo após o seed (AuthProvider chama isto no login).
+    if (env.DEMO_MODE) {
+        cleanupPerformed = true;
         return { cleaned: false, keysRemoved: [] };
     }
     

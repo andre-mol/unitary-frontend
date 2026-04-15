@@ -1,4 +1,10 @@
 import { getRpcMockData, getTableMockData } from './mockRpcData';
+import {
+  isDemoSessionActive,
+  setDemoSessionActive,
+  notifyDemoAuthChanged,
+  validateDemoCredentials,
+} from './demoAuthSession';
 
 const TABLE_MOCK_DATA = getTableMockData();
 const RPC_MOCK_DATA = getRpcMockData();
@@ -108,8 +114,6 @@ class MockChannel {
   unsubscribe() { return Promise.resolve('ok'); }
 }
 
-let _authChangeCallbacks: ((event: string, session: any) => void)[] = [];
-
 export function createMockSupabaseClient(): any {
   return {
     from(table: string) {
@@ -124,21 +128,43 @@ export function createMockSupabaseClient(): any {
 
     auth: {
       getUser() {
+        if (!isDemoSessionActive()) {
+          return Promise.resolve({ data: { user: null }, error: null });
+        }
         return Promise.resolve({ data: { user: MOCK_SUPABASE_USER }, error: null });
       },
       getSession() {
+        if (!isDemoSessionActive()) {
+          return Promise.resolve({ data: { session: null }, error: null });
+        }
         return Promise.resolve({ data: { session: MOCK_SESSION }, error: null });
       },
-      signInWithPassword(_creds: any) {
+      signInWithPassword(creds: { email: string; password: string }) {
+        if (!validateDemoCredentials(creds.email, creds.password)) {
+          return Promise.resolve({
+            data: { session: null, user: null },
+            error: { message: 'Invalid login credentials', status: 400 },
+          });
+        }
+        setDemoSessionActive(true);
+        notifyDemoAuthChanged();
         return Promise.resolve({ data: { session: MOCK_SESSION, user: MOCK_SUPABASE_USER }, error: null });
       },
       signInWithOAuth(_opts: any) {
-        return Promise.resolve({ data: { url: null, provider: 'google' }, error: null });
+        return Promise.resolve({
+          data: { url: null, provider: 'google' },
+          error: { message: 'Google OAuth unavailable in demo', status: 400 },
+        });
       },
       signUp(_creds: any) {
-        return Promise.resolve({ data: { user: MOCK_SUPABASE_USER, session: MOCK_SESSION }, error: null });
+        return Promise.resolve({
+          data: { session: null, user: null },
+          error: { message: 'Signup disabled in demo', status: 400 },
+        });
       },
       signOut() {
+        setDemoSessionActive(false);
+        notifyDemoAuthChanged();
         return Promise.resolve({ error: null });
       },
       resetPasswordForEmail(_email: string) {
@@ -148,24 +174,35 @@ export function createMockSupabaseClient(): any {
         return Promise.resolve({ data: { user: MOCK_SUPABASE_USER }, error: null });
       },
       setSession(_session: any) {
+        if (!isDemoSessionActive()) {
+          return Promise.resolve({ data: { session: null, user: null }, error: null });
+        }
         return Promise.resolve({ data: { session: MOCK_SESSION, user: MOCK_SUPABASE_USER }, error: null });
       },
       onAuthStateChange(cb: (event: string, session: any) => void) {
-        _authChangeCallbacks.push(cb);
-        setTimeout(() => cb('SIGNED_IN', MOCK_SESSION), 50);
+        const emit = () => {
+          if (isDemoSessionActive()) {
+            cb('SIGNED_IN', MOCK_SESSION);
+          } else {
+            cb('SIGNED_OUT', null);
+          }
+        };
+        emit();
+        const handler = () => emit();
+        window.addEventListener('patrio-demo-auth-changed', handler);
         return {
           data: {
             subscription: {
               id: 'demo-subscription',
-              callback: cb,
-              unsubscribe: () => {
-                _authChangeCallbacks = _authChangeCallbacks.filter(c => c !== cb);
-              },
+              unsubscribe: () => window.removeEventListener('patrio-demo-auth-changed', handler),
             },
           },
         };
       },
       refreshSession() {
+        if (!isDemoSessionActive()) {
+          return Promise.resolve({ data: { session: null, user: null }, error: null });
+        }
         return Promise.resolve({ data: { session: MOCK_SESSION, user: MOCK_SUPABASE_USER }, error: null });
       },
     },

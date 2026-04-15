@@ -1,61 +1,20 @@
-# Unitary — Wealth Management System
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-Sistema de gestão patrimonial pessoal construído com **React + TypeScript + Vite + Tailwind CSS**.
+# Run and deploy your AI Studio app
 
-> **Demo estática com dados mockados.** O backend (Supabase) não está incluído neste repositório. Todas as funcionalidades de rede estão desabilitadas e substituídas por dados de demonstração.
+This contains everything you need to run your app locally.
 
-## Stack
+View your app in AI Studio: https://ai.studio/apps/drive/1Iu1topNA7w1UFwdN3bMWNoIKtiyKfaNL
 
-- **React 18** com TypeScript
-- **Vite 6** (build & dev server)
-- **Tailwind CSS 4** (estilização)
-- **TanStack React Query** (gerenciamento de estado assíncrono)
-- **React Router 6** (navegação SPA)
-- **Recharts** (gráficos)
-- **Framer Motion** (animações)
-- **Zod** (validação de schemas)
-- **React Hook Form** (formulários)
+## Run Locally
 
-## Funcionalidades
+**Prerequisites:**  Node.js
 
-- Dashboard com visão geral do patrimônio
-- Portfólios independentes (investimentos, imóveis, empresas)
-- Gestão de ativos com múltiplos métodos de avaliação
-- Histórico de transações e eventos
-- Sistema de metas e alocação por categorias
-- Orçamento doméstico
-- Linha do tempo financeira
-- Calculadoras financeiras (juros compostos, aluguel vs compra, etc.)
-- Sistema de planos com gating de funcionalidades
-- Tema escuro nativo
 
-## Rodar Localmente
-
-```bash
-npm install
-npm run dev
-```
-
-O app inicia em modo demo automaticamente (dados mockados, sem necessidade de backend).
-
-## Deploy (Vercel)
-
-1. Importe este repositório na Vercel
-2. Configure a variável de ambiente: `VITE_DEMO_MODE=true`
-3. Framework preset: **Vite**
-4. Build command: `npm run build`
-5. Output directory: `dist`
-
-## Estrutura
-
-```
-├── components/       # Componentes React (pages, UI, auth, billing, etc.)
-├── config/           # Configuração (env, storage, supabase client)
-├── domain/           # Interfaces de domínio (repositories)
-├── hooks/            # React hooks customizados
-├── infrastructure/   # Implementações (auth, database, storage)
-├── lib/              # Services, queries, utilitários
-├── mocks/            # Dados e clientes mockados (modo demo)
-├── types/            # TypeScript types globais
-└── utils/            # Funções utilitárias
-```
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

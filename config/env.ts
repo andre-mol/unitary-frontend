@@ -24,6 +24,10 @@
  *
  * MODO DEMO (sem backend): defina VITE_DEMO_MODE=true em .env.local ou .env.development.
  * O Vite em `npm run dev` NÃO carrega .env.production — só build de produção.
+ *
+ * Login na demo (sem auto-login): defina também VITE_DEMO_LOGIN_EMAIL e VITE_DEMO_LOGIN_PASSWORD
+ * (ex.: deploy no Vercel + credenciais no README do portfólio). Em `npm run dev`, se omitidas,
+ * use o e-mail demo e senha `demo`.
  * 
  * IMPORTANTE:
  * - NUNCA commit o arquivo .env com chaves reais
@@ -56,6 +60,12 @@ export const env = {
      * Demo Mode - when true, all backend calls are mocked
      */
     DEMO_MODE: getEnvString('VITE_DEMO_MODE') === 'true',
+
+    /** E-mail aceito no login em modo demo (produção / currículo) */
+    DEMO_LOGIN_EMAIL: getEnvString('VITE_DEMO_LOGIN_EMAIL'),
+
+    /** Senha aceita no login em modo demo — trate como credencial pública de vitrine, não como segredo forte */
+    DEMO_LOGIN_PASSWORD: getEnvString('VITE_DEMO_LOGIN_PASSWORD'),
     
     /**
      * Supabase Project URL

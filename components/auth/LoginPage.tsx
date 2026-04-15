@@ -6,13 +6,19 @@ import { Button } from '../ui/Button';
 import { Mail, Lock, Loader2 } from 'lucide-react';
 import { authService } from '../../lib/authService';
 import { captureLoginCompleted, identifyUser } from '../../lib/analytics';
+import { useAuth } from './AuthProvider';
+import { env } from '../../config/env';
+import { DEMO_USER_EMAIL } from '../../mocks/demoMode';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() =>
+    env.DEMO_MODE ? (env.DEMO_LOGIN_EMAIL || DEMO_USER_EMAIL) : ''
+  );
   const [password, setPassword] = useState('');
   const [cooldownActive, setCooldownActive] = useState(false);
   const cooldownTimerRef = useRef<number | null>(null);
@@ -25,6 +31,12 @@ export const LoginPage: React.FC = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,19 +52,20 @@ export const LoginPage: React.FC = () => {
     }, 5000);
 
     try {
-      // Usando o serviço de autenticação (atualmente em modo Bypass)
       const { error } = await authService.signIn(email, password);
 
-      if (error) throw error;
-      
-      // AIDEV-NOTE: Capture login_completed event and identify user
+      if (error) {
+        throw new Error(error.message || 'Falha ao realizar login.');
+      }
+
+      await refreshUser();
+
       const { session } = await authService.getSession();
       if (session?.user?.id) {
         identifyUser(session.user.id);
         captureLoginCompleted();
       }
-      
-      // Redireciona para o dashboard
+
       navigate('/dashboard');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Falha ao realizar login.';
@@ -61,6 +74,9 @@ export const LoginPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const demoPublicEmail = env.DEMO_LOGIN_EMAIL || DEMO_USER_EMAIL;
+  const demoPublicPassword = env.DEMO_LOGIN_PASSWORD || 'demo';
 
   const handleGoogleLogin = async () => {
     if (cooldownActive) {
@@ -74,18 +90,20 @@ export const LoginPage: React.FC = () => {
     }, 5000);
     try {
       const { error } = await authService.signInWithGoogle();
-      if (error) throw error;
-      
-      // AIDEV-NOTE: Capture login_completed event and identify user
+      if (error) throw new Error(error.message || 'Erro ao conectar com Google.');
+
+      await refreshUser();
+
       const { session } = await authService.getSession();
       if (session?.user?.id) {
         identifyUser(session.user.id);
         captureLoginCompleted();
       }
-      
+
       navigate('/dashboard');
     } catch (err: unknown) {
-      setError('Erro ao conectar com Google.');
+      setError(err instanceof Error ? err.message : 'Erro ao conectar com Google.');
+    } finally {
       setLoading(false);
     }
   };
@@ -98,6 +116,24 @@ export const LoginPage: React.FC = () => {
       {resetSuccess && (
         <div className="mb-5 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-300 text-sm">
           Senha atualizada com sucesso. Fa&#231;a login para continuar.
+        </div>
+      )}
+      {env.DEMO_MODE && (
+        <div className="mb-5 p-4 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] text-sm">
+          <p className="font-semibold text-amber-100/95 mb-2">Acesso à demonstração</p>
+          <p className="text-zinc-300 leading-relaxed mb-4">
+            Versão de demonstração com dados fictícios. Entre com:
+          </p>
+          <ul className="space-y-2 text-zinc-200 font-mono text-[13px] bg-zinc-950/60 border border-zinc-800/80 rounded-lg p-3">
+            <li>
+              <span className="text-zinc-500 font-sans text-xs uppercase tracking-wide mr-2">E-mail:</span>
+              {demoPublicEmail}
+            </li>
+            <li>
+              <span className="text-zinc-500 font-sans text-xs uppercase tracking-wide mr-2">Senha:</span>
+              {demoPublicPassword}
+            </li>
+          </ul>
         </div>
       )}
       <form onSubmit={handleLogin} className="space-y-5">

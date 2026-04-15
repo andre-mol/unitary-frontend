@@ -1,10 +1,139 @@
-node_modules/
-dist/
+# ============================================================
+# SECURITY - Environment & Secrets (CRITICAL)
+# ============================================================
 .env
 .env.local
-.env.*.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+.env.staging
+.env.staging.local
+*.env
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+.secrets
+credentials.json
+service-account*.json
+
+# ============================================================
+# Dependencies
+# ============================================================
+node_modules/
+.pnp
+.pnp.js
+
+# ============================================================
+# Build & Output
+# ============================================================
+dist/
+dist-ssr/
+build/
+out/
+.next/
+.nuxt/
+.output/
+*.local
+
+# ============================================================
+# Cache & Temp Files
+# ============================================================
+.cache/
+.parcel-cache/
+.turbo/
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+*.swp
+*.swo
+*~
+.temp/
+.tmp/
+
+# ============================================================
+# Testing
+# ============================================================
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# ============================================================
+# Logs
+# ============================================================
+logs/
 *.log
-.DS_Store
-Thumbs.db
-.vscode/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================================
+# IDE & Editor
+# ============================================================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 .idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# ============================================================
+# OS Generated
+# ============================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================================
+# Debug & Profiling
+# ============================================================
+*.cpuprofile
+*.heapsnapshot
+.clinic/
+.v8-compile-cache/
+
+# ============================================================
+# Misc
+# ============================================================
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vercel
+.netlify
+
+# ============================================================
+# Package Manager Locks (keep only one)
+# Uncomment the ones you DON'T use:
+# ============================================================
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# ============================================================
+# Sentry (if using source maps upload)
+# ============================================================
+.sentryclirc
+
+# ============================================================
+# Local development overrides
+# ============================================================
+*.local.ts
+*.local.tsx
+*.local.js
+*.local.jsx

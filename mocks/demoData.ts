@@ -199,11 +199,17 @@ const HISTORY_EVENTS: PortfolioEvent[] = [
   { id: 'ev-009', portfolioId: PORTFOLIO_ID, assetName: 'ITUB4', assetCategory: 'Ações', date: '2024-08-01', createdAt: '2024-08-01T10:00:00Z', type: 'dividend', totalValue: 52.5, quantity: 350, unitPrice: 0.15 },
 ];
 
+/**
+ * Distribuição do salário (Orçamento doméstico / página Metas — aba Distribuição).
+ * As categorias das despesas devem coincidir com `goal.category` para os cards preencherem.
+ */
 const GOALS: Goal[] = [
-  { id: 'goal-1', category: 'Ações', percentage: 40, color: '#f59e0b' },
-  { id: 'goal-2', category: 'FIIs', percentage: 25, color: '#3b82f6' },
-  { id: 'goal-3', category: 'Renda Fixa', percentage: 30, color: '#10b981' },
-  { id: 'goal-4', category: 'Caixa', percentage: 5, color: '#6b7280' },
+  { id: '1', category: 'Investimentos', percentage: 30, color: '#f59e0b' },
+  { id: '2', category: 'Custos Fixos', percentage: 35, color: '#ef4444' },
+  { id: '6', category: 'Metas', percentage: 10, color: '#06b6d4' },
+  { id: '3', category: 'Conforto', percentage: 15, color: '#3b82f6' },
+  { id: '4', category: 'Conhecimento', percentage: 5, color: '#8b5cf6' },
+  { id: '5', category: 'Prazeres', percentage: 5, color: '#ec4899' },
 ];
 
 const BUDGET: Budget = {
@@ -219,19 +225,31 @@ const PREV_BUDGET: Budget = {
 };
 
 const EXPENSES: Expense[] = [
-  { id: 'exp-1', month: monthStr, category: 'Moradia', name: 'Aluguel', value: 2200, type: 'fixo', createdAt: makeDate(5) },
-  { id: 'exp-2', month: monthStr, category: 'Moradia', name: 'Condomínio', value: 450, type: 'fixo', createdAt: makeDate(5) },
-  { id: 'exp-3', month: monthStr, category: 'Alimentação', name: 'Supermercado', value: 1200, type: 'variavel', createdAt: makeDate(3) },
-  { id: 'exp-4', month: monthStr, category: 'Transporte', name: 'Combustível', value: 350, type: 'variavel', createdAt: makeDate(2) },
-  { id: 'exp-5', month: monthStr, category: 'Saúde', name: 'Plano de Saúde', value: 680, type: 'fixo', createdAt: makeDate(5) },
-  { id: 'exp-6', month: monthStr, category: 'Lazer', name: 'Streaming', value: 85, type: 'recorrente', createdAt: makeDate(5) },
-  { id: 'exp-7', month: monthStr, category: 'Educação', name: 'Curso Online', value: 150, type: 'recorrente', createdAt: makeDate(5) },
+  { id: 'exp-1', month: monthStr, category: 'Custos Fixos', name: 'Aluguel', value: 2200, type: 'fixo', createdAt: makeDate(5) },
+  { id: 'exp-2', month: monthStr, category: 'Custos Fixos', name: 'Condomínio', value: 450, type: 'fixo', createdAt: makeDate(5) },
+  { id: 'exp-3', month: monthStr, category: 'Conforto', name: 'Supermercado', value: 1200, type: 'variavel', createdAt: makeDate(3) },
+  { id: 'exp-4', month: monthStr, category: 'Conforto', name: 'Combustível', value: 350, type: 'variavel', createdAt: makeDate(2) },
+  { id: 'exp-5', month: monthStr, category: 'Custos Fixos', name: 'Plano de Saúde', value: 680, type: 'fixo', createdAt: makeDate(5) },
+  { id: 'exp-6', month: monthStr, category: 'Prazeres', name: 'Streaming', value: 85, type: 'recorrente', createdAt: makeDate(5) },
+  { id: 'exp-7', month: monthStr, category: 'Conhecimento', name: 'Curso Online', value: 150, type: 'recorrente', createdAt: makeDate(5) },
+  { id: 'exp-8', month: monthStr, category: 'Metas', name: 'Aporte: Viagem Internacional', value: 400, type: 'recorrente', createdAt: makeDate(4) },
+];
+
+/** Mês anterior — navegação no seletor da página de orçamento */
+const EXPENSES_PREV: Expense[] = [
+  { id: 'exp-p1', month: prevMonthStr, category: 'Custos Fixos', name: 'Aluguel', value: 2200, type: 'fixo', createdAt: makeDate(35) },
+  { id: 'exp-p2', month: prevMonthStr, category: 'Custos Fixos', name: 'Condomínio', value: 450, type: 'fixo', createdAt: makeDate(35) },
+  { id: 'exp-p3', month: prevMonthStr, category: 'Conforto', name: 'Supermercado', value: 1100, type: 'variavel', createdAt: makeDate(33) },
+  { id: 'exp-p4', month: prevMonthStr, category: 'Conforto', name: 'Combustível', value: 320, type: 'variavel', createdAt: makeDate(32) },
+  { id: 'exp-p5', month: prevMonthStr, category: 'Custos Fixos', name: 'Plano de Saúde', value: 680, type: 'fixo', createdAt: makeDate(35) },
+  { id: 'exp-p6', month: prevMonthStr, category: 'Prazeres', name: 'Streaming', value: 85, type: 'recorrente', createdAt: makeDate(35) },
+  { id: 'exp-p7', month: prevMonthStr, category: 'Metas', name: 'Aporte: Fundo de Emergência', value: 850, type: 'recorrente', createdAt: makeDate(34) },
 ];
 
 const CATEGORIES = ['Geral', 'Ações', 'FIIs', 'Renda Fixa', 'Caixa', 'Imóveis', 'Veículos', 'Participações'];
 
 export function seedDemoData(): void {
-  const DEMO_SEEDED_KEY = 'patrio_demo_seeded_v2';
+  const DEMO_SEEDED_KEY = 'patrio_demo_seeded_v3';
   if (localStorage.getItem(DEMO_SEEDED_KEY)) return;
 
   localStorage.setItem('patrio_portfolios', JSON.stringify(PORTFOLIOS));
@@ -245,6 +263,7 @@ export function seedDemoData(): void {
   localStorage.setItem(`patrio_budget_${monthStr}`, JSON.stringify(BUDGET));
   localStorage.setItem(`patrio_budget_${prevMonthStr}`, JSON.stringify(PREV_BUDGET));
   localStorage.setItem(`patrio_expenses_${monthStr}`, JSON.stringify(EXPENSES));
+  localStorage.setItem(`patrio_expenses_${prevMonthStr}`, JSON.stringify(EXPENSES_PREV));
   localStorage.setItem('patrio_objectives', JSON.stringify([
     {
       id: 'obj-1',
